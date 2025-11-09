@@ -15,6 +15,7 @@ import Icon from '@/components/ui/icon';
 
 const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState('standard');
   const [activeSection, setActiveSection] = useState('dashboard');
   const [releaseStep, setReleaseStep] = useState(1);
   const [releaseForm, setReleaseForm] = useState({
@@ -92,7 +93,10 @@ const Index = () => {
                   <Label htmlFor="password">Пароль</Label>
                   <Input id="password" type="password" placeholder="••••••••" />
                 </div>
-                <Button className="w-full" onClick={() => setIsAuthenticated(true)}>
+                <Button className="w-full" onClick={() => {
+                  setIsAuthenticated(true);
+                  setUserRole('admin');
+                }}>
                   Войти
                 </Button>
               </TabsContent>
@@ -151,13 +155,14 @@ const Index = () => {
           
           <nav className="space-y-2">
             {[
-              { id: 'dashboard', label: 'Дашборд', icon: 'LayoutDashboard' },
-              { id: 'release', label: 'Новый релиз', icon: 'Upload' },
-              { id: 'catalog', label: 'Каталог', icon: 'Disc3' },
-              { id: 'news', label: 'Новости', icon: 'Newspaper' },
-              { id: 'profile', label: 'Профиль', icon: 'User' },
-              { id: 'support', label: 'Поддержка', icon: 'MessageCircle' },
-            ].map((item) => (
+              { id: 'dashboard', label: 'Дашборд', icon: 'LayoutDashboard', adminOnly: false },
+              { id: 'release', label: 'Новый релиз', icon: 'Upload', adminOnly: false },
+              { id: 'catalog', label: 'Каталог', icon: 'Disc3', adminOnly: false },
+              { id: 'news', label: 'Новости', icon: 'Newspaper', adminOnly: false },
+              { id: 'profile', label: 'Профиль', icon: 'User', adminOnly: false },
+              { id: 'support', label: 'Поддержка', icon: 'MessageCircle', adminOnly: false },
+              { id: 'admin', label: 'Админ-панель', icon: 'Shield', adminOnly: true },
+            ].filter(item => !item.adminOnly || userRole === 'admin').map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActiveSection(item.id)}
@@ -657,6 +662,251 @@ const Index = () => {
                   </Button>
                 </CardContent>
               </Card>
+            </div>
+          )}
+
+          {activeSection === 'admin' && userRole === 'admin' && (
+            <div className="space-y-6 animate-fade-in">
+              <div>
+                <h2 className="text-3xl font-bold text-foreground">Админ-панель 🛡️</h2>
+                <p className="text-muted-foreground mt-1">Управление платформой</p>
+              </div>
+
+              <Tabs defaultValue="users">
+                <TabsList className="grid w-full grid-cols-5">
+                  <TabsTrigger value="users">Пользователи</TabsTrigger>
+                  <TabsTrigger value="moderation">Модерация</TabsTrigger>
+                  <TabsTrigger value="tickets">Тикеты</TabsTrigger>
+                  <TabsTrigger value="news-admin">Новости</TabsTrigger>
+                  <TabsTrigger value="stats">Статистика</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="users" className="space-y-4 mt-6">
+                  <Card>
+                    <CardHeader>
+                      <div className="flex justify-between items-center">
+                        <CardTitle>Управление пользователями</CardTitle>
+                        <Input placeholder="Поиск пользователя..." className="w-64" />
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {[
+                          { id: 1, name: 'Иван Иванов', nickname: 'DJ Ivan', email: 'ivan@example.com', status: 'standard', blocked: false },
+                          { id: 2, name: 'Петр Петров', nickname: 'MC Pete', email: 'pete@example.com', status: 'premium', blocked: false },
+                          { id: 3, name: 'Анна Смирнова', nickname: 'Anna Music', email: 'anna@example.com', status: 'label_artist', blocked: true },
+                        ].map((user) => (
+                          <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div className="flex items-center gap-4">
+                              <Avatar>
+                                <AvatarFallback className="bg-primary text-white">
+                                  {user.name.split(' ').map(n => n[0]).join('')}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <h4 className="font-semibold">{user.name}</h4>
+                                <p className="text-sm text-muted-foreground">{user.nickname} • {user.email}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Select defaultValue={user.status}>
+                                <SelectTrigger className="w-40">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="admin">Администратор</SelectItem>
+                                  <SelectItem value="label_artist">Артист лейбла</SelectItem>
+                                  <SelectItem value="premium">Премиум</SelectItem>
+                                  <SelectItem value="standard">Стандарт</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              {user.blocked ? (
+                                <Button variant="outline" size="sm">
+                                  <Icon name="Unlock" size={16} className="mr-1" />
+                                  Разблокировать
+                                </Button>
+                              ) : (
+                                <Button variant="destructive" size="sm">
+                                  <Icon name="Lock" size={16} className="mr-1" />
+                                  Заблокировать
+                                </Button>
+                              )}
+                              <Button variant="outline" size="sm">
+                                <Icon name="Key" size={16} />
+                              </Button>
+                              <Button variant="outline" size="sm">
+                                <Icon name="Trash2" size={16} />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="moderation" className="space-y-4 mt-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Релизы на модерации</CardTitle>
+                      <CardDescription>Проверьте и одобрите новые релизы</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {[
+                          { id: 1, title: 'Новый EP', artist: 'Артист 2', tracks: 5, submitted: '2025-11-08' },
+                          { id: 2, title: 'Летний сингл', artist: 'DJ Ivan', tracks: 1, submitted: '2025-11-07' },
+                        ].map((release) => (
+                          <Card key={release.id}>
+                            <CardContent className="pt-6">
+                              <div className="flex justify-between items-start mb-4">
+                                <div className="flex gap-4">
+                                  <div className="w-20 h-20 bg-primary/20 rounded-lg flex items-center justify-center text-3xl">
+                                    🎧
+                                  </div>
+                                  <div>
+                                    <h4 className="font-bold text-lg">{release.title}</h4>
+                                    <p className="text-sm text-muted-foreground">{release.artist}</p>
+                                    <p className="text-sm text-muted-foreground mt-1">
+                                      {release.tracks} треков • Отправлено {release.submitted}
+                                    </p>
+                                  </div>
+                                </div>
+                                <Badge>На модерации</Badge>
+                              </div>
+                              <Separator className="my-4" />
+                              <div className="flex gap-2">
+                                <Button className="flex-1">
+                                  <Icon name="Check" size={16} className="mr-2" />
+                                  Одобрить
+                                </Button>
+                                <Button variant="destructive" className="flex-1">
+                                  <Icon name="X" size={16} className="mr-2" />
+                                  Отклонить
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="tickets" className="space-y-4 mt-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Обращения пользователей</CardTitle>
+                      <CardDescription>Ответьте на запросы поддержки</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {[
+                          { id: 1, user: 'Иван Иванов', subject: 'Проблема с загрузкой трека', status: 'open', created: '2025-11-09' },
+                          { id: 2, user: 'Петр Петров', subject: 'Вопрос о роялти', status: 'in_progress', created: '2025-11-08' },
+                        ].map((ticket) => (
+                          <div key={ticket.id} className="flex items-center justify-between p-4 border rounded-lg hover:border-primary transition-colors cursor-pointer">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h4 className="font-semibold">{ticket.subject}</h4>
+                                <Badge variant={ticket.status === 'open' ? 'default' : 'secondary'}>
+                                  {ticket.status === 'open' ? 'Новое' : 'В работе'}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground">{ticket.user} • {ticket.created}</p>
+                            </div>
+                            <Button variant="outline" size="sm">
+                              <Icon name="MessageSquare" size={16} className="mr-2" />
+                              Ответить
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="news-admin" className="space-y-4 mt-6">
+                  <Card>
+                    <CardHeader>
+                      <div className="flex justify-between items-center">
+                        <CardTitle>Создать новость</CardTitle>
+                        <Button>
+                          <Icon name="Plus" size={16} className="mr-2" />
+                          Добавить новость
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Заголовок</Label>
+                        <Input placeholder="Заголовок новости" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Содержание</Label>
+                        <Textarea placeholder="Текст новости..." className="min-h-32" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Тип новости</Label>
+                        <Select defaultValue="service">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="service">Новости сервиса</SelectItem>
+                            <SelectItem value="artist">Новости артистов</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button className="w-full">
+                        <Icon name="Send" size={16} className="mr-2" />
+                        Опубликовать
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="stats" className="space-y-4 mt-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Icon name="Users" size={20} className="text-primary" />
+                          Пользователей
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-4xl font-bold">248</div>
+                        <p className="text-sm text-muted-foreground mt-1">+12 за неделю</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Icon name="Disc3" size={20} className="text-secondary" />
+                          Релизов
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-4xl font-bold">1,542</div>
+                        <p className="text-sm text-muted-foreground mt-1">+34 за неделю</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Icon name="Clock" size={20} className="text-accent" />
+                          На модерации
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-4xl font-bold">8</div>
+                        <p className="text-sm text-muted-foreground mt-1">Требуют проверки</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
           )}
         </main>

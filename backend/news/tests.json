@@ -1,0 +1,27 @@
+{
+  "tests": [
+    {
+      "name": "Get all news",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Create news article",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "create",
+        "title": "Test News",
+        "content": "Test content",
+        "type": "service",
+        "authorId": 1
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "success": true
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
