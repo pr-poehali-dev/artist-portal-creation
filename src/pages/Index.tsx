@@ -75,7 +75,7 @@ const Index = () => {
                 <Icon name="Music" size={32} className="text-white" />
               </div>
             </div>
-            <CardTitle className="text-3xl font-bold">MusicHub</CardTitle>
+            <CardTitle className="text-3xl font-bold">cvdence Music</CardTitle>
             <CardDescription>Платформа для дистрибуции музыки</CardDescription>
           </CardHeader>
           <CardContent>
